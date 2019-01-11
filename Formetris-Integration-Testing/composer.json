@@ -1,0 +1,12 @@
+{
+    "scripts": {
+        "test": "vendor\\bin\\phpunit.bat"
+    },
+    "require": {
+        "phpunit/phpunit": "^7.5",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "autoload": {
+        "psr-4": { "Testing\\": "tests/" }
+    }
+}
