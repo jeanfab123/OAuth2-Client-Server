@@ -22,11 +22,52 @@ class Resources {
         return new Client(['base_uri' => self::OAUTH2_SERVER_BASE_URI]);
     }
 
-    public function requestOAuth2ServerToken($login, $password) : void
+    public function requestOAuth2ServerForToken($login, $password) : void
     {
+
+/*
         $client = $this->initializeOAuth2ServerRequest();
-        $response = $client->get(self::OAUTH2_SERVER_TOKEN_END_POINT);
+        $response = $client->post(self::OAUTH2_SERVER_TOKEN_END_POINT);
+*/
+
+$this->OAuth2StatusCode = 401;
+
+/*
         $this->OAuth2StatusCode = $response->getStatusCode();
+        return $this->OAuth2StatusCode;
+*/
+
+/*
+        $client = $this->initializeOAuth2ServerRequest();
+        $request = $client->post(self::OAUTH2_SERVER_TOKEN_END_POINT, null, array(
+            'client_id'     => $login,
+            'client_secret' => $password,
+            'grant_type'    => 'client_credentials',
+        ));
+
+        $response = $request->send();
+        $responseBody = $response->getBody(true);
+*/
+
+
+/*
+        $client = $this->initializeOAuth2ServerRequest();
+        $response = $client->request(
+            'POST',
+            self::OAUTH2_SERVER_TOKEN_END_POINT,
+
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'grant_type' => 'client_credentials'
+                ]
+            ],
+            [
+                'auth' => [$login, $password],
+            ]
+        );
+*/
+
     }
 
     public function generateNewJsonTokenWithHash($token, $expirationTime) : bool
@@ -38,7 +79,7 @@ json_encode()
 */
     }
 
-    public function testTokenValidity(json $jsonToken) : bool
+    public function testTokenValidity(string $jsonToken) : bool
     {
 
         // -- Decode jsonToken
@@ -57,8 +98,11 @@ json_encode()
 
         // -- Test jsonToken validity date
 
-        return true;
+        return false;
     }
+
+
+
 
     public function getOAuth2ServerBaseUri() : string
     {
@@ -68,5 +112,10 @@ json_encode()
     public function getOAuth2ServerTokenEndPoint() : string
     {
         return self::OAUTH2_SERVER_TOKEN_END_POINT;
+    }
+
+    public function getOAuth2StatusCode() : int
+    {
+        return $this->OAuth2StatusCode;
     }
 }

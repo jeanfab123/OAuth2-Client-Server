@@ -1,7 +1,11 @@
 {
+    "scripts": {
+        "test": "vendor\\bin\\phpunit.bat"
+    },
     "require": {
         "slim/slim": "^3.0",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.3",
+        "phpunit/phpunit": "^7.5"
     },
     "autoload": {
         "psr-4": { "Resources\\": "app/Resources" }

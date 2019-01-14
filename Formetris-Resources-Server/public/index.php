@@ -17,23 +17,20 @@ $app = new \Slim\App;
 
 $app->get('/survey-generation', function (Request $request, Response $response) {
 
+/*
 $response = $response->withStatus(401);
 return $response;
+*/
 
     $resources = new Resources;
 
-    // -- Get Headers
-
-    //$headers = $response->getHeader('mon-header');
-
     // -- Get Body
 
-
-    $datas = $request->getParsedBody();
+    $token = $request->getHeader('token');
 
     // -- Get Token
  
-    $jsonToken = isset($datas['token']) ? $datas['token'] : null;
+    $jsonToken = isset($token['token']) ? $token['token'] : null;
 
     // -- Token is not defined
 
@@ -49,13 +46,12 @@ return $response;
         if (($login != null) && ($password != null)) {
 
             // -- Request OAuth2 Server Token with Login and Password
-            // TO DO
 
-
+            $resources->requestOAuth2ServerForToken($login, $password);
 
             // -- Test OAuth2 Server request response
 
-            if (1 == 2) { // Bad response
+            if ($resources->getOAuth2StatusCode() != 200) {
 
                 // -- Send Bad Response
 
