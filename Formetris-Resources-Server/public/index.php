@@ -24,11 +24,9 @@ return $response;
 
     $resources = new Resources;
 
-    // -- Get Body
+    // -- Get Token
 
     $token = $request->getHeader('token');
-
-    // -- Get Token
  
     $jsonToken = isset($token['token']) ? $token['token'] : null;
 
@@ -60,9 +58,14 @@ return $response;
 
             } else {
 
-                // -- Generate new JSON Token (with hash)
+                // -- Generate Resources JSON Token
 
-                $newJsonToken = $resources->generateNewJsonTokenWithHash($oAuth2JsonToken);
+                if (!$resources->generateResourcesJsonToken($resources->getOAuth2JsonToken())) {
+                    $response = $response->withStatus(401);
+                    return $response;
+                }
+
+                $resourcesJsonToken = $resources->getResourcesToken();
             }
 
         } else {
@@ -78,9 +81,9 @@ return $response;
     
     } else {
 
-        // -- Test token validity
+        // -- Test Client authorization
 
-        if (!$resources->testTokenValidity($jsonToken)) {
+        if (!$resources->testClientAuthorization($jsonToken)) {
 
             // -- Send token error message
 
@@ -93,6 +96,7 @@ return $response;
     // -- Treatment and send answer
 
 });
+
 
 // -- Exec Slim
 

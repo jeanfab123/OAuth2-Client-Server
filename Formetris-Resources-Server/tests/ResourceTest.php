@@ -8,13 +8,26 @@ use Resources\Resources;
 class ResourceTest extends TestCase
 {
 
+    private $OAuth2ServerToken = '{"access_token":"f559d449d2176ff40a20673524a6df1b0ce13413","expires_in":120,"token_type":"Bearer","scope":null}';
+
+    private $OAuth2GoodLogin = 'testClient';
+    private $OAuth2GoodPassword = ''; // TO DO : à compléter avec la bonne valeur
+
+    private $OAuth2BadLogin = 'mybadlogin';
+    private $OAuth2BadPassword = 'mybadpassword';
+
+
+    /******************************************************************/
+    /******************* TEST BAD / GOOD CREDENTIALS ******************/
+    /******************************************************************/
+
     /**
      * @test
      */
     public function shouldFailWhenThereIsBadCredentials()
     {
-        $resources = new resources;
-        $resources->requestOAuth2ServerForToken('mybadlogin', 'mybadpassword');
+        $resources = new Resources;
+        $resources->requestOAuth2ServerForToken($this->OAuth2BadLogin, $this->OAuth2BadPassword);
         $this->assertEquals(401, $resources->getOAuth2StatusCode());
     }
 
@@ -24,54 +37,81 @@ class ResourceTest extends TestCase
      */
     public function shouldValidWhenThereIsGoodCredentials()
     {
-        $resources = new resources;
-        $resources->requestOAuth2ServerForToken('mygoodlogin', 'mygoodpassword');
+        $resources = new Resources;
+        $resources->requestOAuth2ServerForToken($this->OAuth2GoodLogin, $this->OAuth2GoodPassword);
         $this->assertEquals(200, $resources->getOAuth2StatusCode());
     }
 
 
+    /*********************************************************/
+    /******************* TEST TOKEN FAILURE ******************/
+    /*********************************************************/
+
     /**
      * @test
      */
-    public function shouldFailWhenTokenIsInvalid() {
+    public function shouldFailWhenBadResourcesTokenAuthenticity() {
 
-        // -- Bad Token
-        $token = [
-            'token' => 'mybadtoken',
-            'max-validity-date' => '2019-01-01 12:24:37',
-            'hash' => '$12.hzez$zoduy$ncsolasotwnc'
-        ];
+        $resources = new Resources;
 
-        $jsonToken = json_encode($token);
+        $resources->generateResourcesJsonToken($this->OAuth2ServerToken);
+        $extractedTokenDatas = $resources->extractClientTokenDatas($resources->getResourcesJsonToken());
 
-        $resources = new resources;
-        $tokenResult = $resources->testTokenValidity($jsonToken);
-        $this->assertFalse($tokenResult);
+        // -- Modify token
+
+        $extractedTokenDatas->token = 'isitabadtoken?noofcourse!!!!';
+
+        $testResult = $resources->testClientTokenAuthenticity($extractedTokenDatas);
+
+        $this->assertFalse($testResult);
     }
 
     /**
      * @test
      */
-    public function shouldValidWhenTokenIsValid() {
+    public function shouldFailWhenResourcesTokenWasExpired() {
 
-        // -- Good Token
-        $token = [
-            'token' => 'mygoodtoken',
-            'max-validity-date' => '2019-01-01 12:24:37',
-            'hash' => '$12.hzez$zoduy$ncsolasotwnc'
-        ];
+        $resources = new Resources;
 
-        $jsonToken = json_encode($token);
+        $resources->generateResourcesJsonToken($this->OAuth2ServerToken);
+        $extractedTokenDatas = $resources->extractClientTokenDatas($resources->getResourcesJsonToken());
 
-        $resources = new resources;
-        $tokenResult = $resources->testTokenValidity($jsonToken);
-        $this->assertTrue($tokenResult);
+        // -- Modify expiration date
+
+        $extractedTokenDatas->expiration_date = '2018-01-01 09:00:00';
+
+        $testResult = $resources->testClientTokenExpirationDate($extractedTokenDatas);
+
+        $this->assertFalse($testResult);
     }
 
-    // --------------------------------------------------- //
-    // -- TO DO : tester que le token est correctement généré
-    // --------------------------------------------------- //
+    /*************************************************************/
+    /******************* TEST TOKEN SUCCESSFULL ******************/
+    /*************************************************************/
 
+    /**
+     * @test
+     */
+    public function shouldValidWhenResourcesServerIsCorrectlyGenerated() {
 
+        // TO DO : Test à modifier ???
+
+        $resources = new Resources;
+        $testResult = $resources->generateResourcesJsonToken($this->OAuth2ServerToken);
+        $this->assertTrue($testResult);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldValidWhenResourcesTokenIsValid() {
+
+        $resources = new Resources;
+
+        $resources->generateResourcesJsonToken($this->OAuth2ServerToken);
+
+        $testResult = $resources->testClientAuthorization($resources->getResourcesJsonToken());
+        $this->assertTrue($testResult);
+    }
 
 }

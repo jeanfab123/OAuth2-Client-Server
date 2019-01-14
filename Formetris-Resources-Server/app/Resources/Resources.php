@@ -8,21 +8,19 @@ class Resources {
 
     const OAUTH2_SERVER_BASE_URI = 'http://localhost:8000';
     const OAUTH2_SERVER_TOKEN_END_POINT = '/token.php';
-    const TOKEN_HASH_SECRET_KEY = 'For!MeTrhriSs$Hhhh?';
+    // const TOKEN_HASH_SECRET_KEY = 'For!MeTrhriSs$Hhhh?'; // useless ?
 
     private $OAuth2StatusCode;
+    private $oAuth2JsonToken;
+    private $resourcesJsonToken;
 
     public function __construct()
     {
 
     }
 
-    private function initializeOAuth2ServerRequest() : object
-    {
-        return new Client(['base_uri' => self::OAUTH2_SERVER_BASE_URI]);
-    }
 
-    public function requestOAuth2ServerForToken($login, $password) : void
+    public function requestOAuth2ServerForToken(string $login, string $password) : void
     {
 
 /*
@@ -31,6 +29,8 @@ class Resources {
 */
 
 $this->OAuth2StatusCode = 401;
+
+$this->OAuthJsonToken = null;
 
 /*
         $this->OAuth2StatusCode = $response->getStatusCode();
@@ -70,52 +70,175 @@ $this->OAuth2StatusCode = 401;
 
     }
 
-    public function generateNewJsonTokenWithHash($token, $expirationTime) : bool
-    {
-        $token = 'mymarvelloustoken';
-/*
-password_hash($password, PASSWORD_BCRYPT);
-json_encode()
-*/
-    }
-
-    public function testTokenValidity(string $jsonToken) : bool
+    public function generateResourcesJsonToken(string $OAuth2ServerToken) : bool
     {
 
-        // -- Decode jsonToken
+        // -- Decode JSON OAuth2 Server Token
 
-        /*
-        json_decode()
+        $serverToken = json_decode($OAuth2ServerToken);
 
-        $token
-        $expirationDate
-        $hash
-        */
+        // -- Extract Token datas of transmitted OAuth2 Server Token
 
-        // -- Test jsonToken integrity
+        $token = isset($serverToken->access_token) ? $serverToken->access_token : null;
 
-        // password_verify($password, $user['password']);
+        if ($token == null) {
+            return false;
+        }
 
-        // -- Test jsonToken validity date
+        $expirationTime = isset($serverToken->expires_in) ? $serverToken->expires_in : null;
 
-        return false;
+        // -- Calculate expiration date
+
+        $expirationDate = date('Y-m-d H:i:s', strtotime(' + ' . $expirationTime . ' seconds'));
+
+        // -- Generate Token hash
+
+        $hash = $this->hashTokenWithExpirationDate($token, $expirationDate);
+
+        // -- Build Resources Token
+
+        $resourcesToken = [
+            'token' => $token,
+            'expiration_date' => $expirationDate,
+            'hash' => $hash
+        ];
+
+        // -- Encode JSON
+
+        $this->resourcesJsonToken = json_encode($resourcesToken);
+
+        return true;
+    }
+
+    public function testClientAuthorization(string $jsonToken) : bool
+    {
+
+        $clientTokenDatas = $this->extractClientTokenDatas($jsonToken);
+
+        if ($clientTokenDatas->token == null) {
+            return false;
+        }
+
+        if ($clientTokenDatas->hash == null) {
+            return false;
+        }
+
+        if (!$this->testClientTokenAuthenticity($clientTokenDatas)) {
+            return false;
+        }
+
+        if (!$this->testClientTokenExpirationDate($clientTokenDatas)) {
+            return false;
+        }
+
+        return true;
     }
 
 
+    public function extractClientTokenDatas(string $jsonToken) : object
+    {
+
+        $tokenDatas = json_decode($jsonToken);
+
+        $extractedTokenDatas = new \stdClass;
+
+        $extractedTokenDatas->token = isset($tokenDatas->token) ? $tokenDatas->token : null;
+        $extractedTokenDatas->expiration_date = isset($tokenDatas->expiration_date) ? $tokenDatas->expiration_date : null;
+        $extractedTokenDatas->hash = isset($tokenDatas->hash) ? $tokenDatas->hash : null;
+
+        return $extractedTokenDatas;
+    }
+
+    public function testClientTokenAuthenticity(object $clientTokenDatas) : bool
+    {
+
+        return password_verify($clientTokenDatas->token.$clientTokenDatas->expiration_date, $clientTokenDatas->hash);
+    }
 
 
+    public function testClientTokenExpirationDate(object $clientTokenDatas) : bool
+    {
+
+        $expirationDate = isset($clientTokenDatas->expiration_date) ? $clientTokenDatas->expiration_date : null;
+
+        if ($expirationDate < date('Y-m-d H:i:s')) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+    * Initialize OAuth2 Server Request
+    *
+    * @return object Client Object
+    */
+    private function initializeOAuth2ServerRequest() : object
+    {
+        return new Client(['base_uri' => self::OAUTH2_SERVER_BASE_URI]);
+    }
+
+    /**
+    * Hash Token with expiration date
+    *
+    * @param string $token
+    * @param date expirationDate
+    *
+    * @return string hash
+    */
+    private function hashTokenWithExpirationDate(string $token, string $expirationDate) : string
+    {
+        return password_hash($token . $expirationDate, PASSWORD_BCRYPT);
+    }
+
+    /**
+    * Get OAuth2 Server Url
+    *
+    * @return string OAuth2 Server Url
+    */
     public function getOAuth2ServerBaseUri() : string
     {
         return self::OAUTH2_SERVER_BASE_URI;
     }
 
+    /**
+    * Get OAuth2 Server Token end point url
+    *
+    * @return string OAuth2 Server end point url
+    */
     public function getOAuth2ServerTokenEndPoint() : string
     {
         return self::OAUTH2_SERVER_TOKEN_END_POINT;
     }
 
+    /**
+    * Get OAuth2 Json Token
+    *
+    * @return string OAuth2 Json Token
+    */
+    public function getOAuth2JsonToken() : string
+    {
+        return $this->oAuth2JsonToken;
+    }
+
+    /**
+    * Get OAuth2 Status Code
+    *
+    * @return string OAuth2 Status Code
+    */
     public function getOAuth2StatusCode() : int
     {
         return $this->OAuth2StatusCode;
+    }
+
+    /**
+    * Get Resources Json Token
+    *
+    * @return string Resources Json Token
+    */
+    public function getResourcesJsonToken() : string
+    {
+        return $this->resourcesJsonToken;
     }
 }
