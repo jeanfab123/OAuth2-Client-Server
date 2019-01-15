@@ -16,7 +16,6 @@ class ResourceTest extends TestCase
     private $OAuth2BadLogin = 'mybadlogin';
     private $OAuth2BadPassword = 'mybadpassword';
 
-
     /******************************************************************/
     /******************* TEST BAD / GOOD CREDENTIALS ******************/
     /******************************************************************/
@@ -92,12 +91,38 @@ class ResourceTest extends TestCase
     /**
      * @test
      */
-    public function shouldValidWhenResourcesServerIsCorrectlyGenerated() {
+    public function shouldValidWhenResourcesServerTokenIsCorrectlyGenerated() {
 
-        // TO DO : Test à modifier ???
+        // -- Extract OAuth2 Json Token Datas
+
+        $extractedOAuth2ServerTokenDatas = new \stdClass;
+        $extractedOAuth2ServerTokenDatas = json_decode($this->OAuth2ServerToken);
+
+        // -- Get this instant for expiration date test
+
+        $now = date('Y-m-d H:i:s');
+
+        // -- Generate and extract Resources Server Token Datas
 
         $resources = new Resources;
-        $testResult = $resources->generateResourcesJsonToken($this->OAuth2ServerToken);
+
+        $resources->generateResourcesJsonToken($this->OAuth2ServerToken);
+        $extractedTokenDatas = $resources->extractClientTokenDatas($resources->getResourcesJsonToken());
+
+        // -- Compare Resources Server Token value with OAuth2 Server Token value
+
+        $this->assertEquals($extractedOAuth2ServerTokenDatas->access_token, $extractedTokenDatas->token);
+
+        // -- Compare Resources Server Token expiration date with estimated expiration date
+
+        $estimatedExpirationDate = date("Y-m-d H:i:s", (strtotime(date($now)) + $extractedOAuth2ServerTokenDatas->expires_in));
+
+        $this->assertEquals($extractedTokenDatas->expiration_date, $estimatedExpirationDate);
+
+        // -- Test Client Token Authenticity
+
+        $testResult = $resources->testClientTokenAuthenticity($extractedTokenDatas);
+
         $this->assertTrue($testResult);
     }
 

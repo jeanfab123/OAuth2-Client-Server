@@ -13,6 +13,7 @@ class Resources {
     private $OAuth2StatusCode;
     private $oAuth2JsonToken;
     private $resourcesJsonToken;
+    private $resourcesResponse;
 
     public function __construct()
     {
@@ -151,8 +152,14 @@ $this->OAuthJsonToken = null;
 
     public function testClientTokenAuthenticity(object $clientTokenDatas) : bool
     {
+        $token = isset($clientTokenDatas->token) ? $clientTokenDatas->token : null;
+        $hash = isset($clientTokenDatas->hash) ? $clientTokenDatas->hash : null;
+        $expirationDate = isset($clientTokenDatas->expiration_date) ? $clientTokenDatas->expiration_date : null;
 
-        return password_verify($clientTokenDatas->token.$clientTokenDatas->expiration_date, $clientTokenDatas->hash);
+        if (($token == null) || ($hash == null))
+            return false;
+
+        return password_verify($token.$expirationDate, $hash);
     }
 
 
@@ -165,6 +172,82 @@ $this->OAuthJsonToken = null;
             return false;
         }
 
+        return true;
+    }
+
+
+    public function testClientAuthorizationToAccessResources(object $request, object $response)
+    {
+
+        // -- Get Token
+    
+        $token = $request->getHeader('token');
+     
+        $jsonToken = isset($token['token']) ? $token['token'] : null;
+    
+        // -- Token is not defined
+    
+        if ($jsonToken == null) {
+    
+            // -- Get Login and Password
+    
+            $auth = $response->getHeader('auth');
+    
+            $login = isset($auth[0]) ? $auth[0] : null;
+            $password = isset($auth[1]) ? $auth[1] : null;
+    
+            if (($login != null) && ($password != null)) {
+    
+                // -- Request OAuth2 Server Token with Login and Password
+    
+                $this->requestOAuth2ServerForToken($login, $password);
+
+                // -- Test OAuth2 Server request response
+
+                if ($this->getOAuth2StatusCode() != 200) { // TO DO : à modifier ???
+    
+                    // -- Send Bad Response
+    
+                    $this->resourcesResponse = $response->withStatus(401);
+                    return false;
+    
+                } else {
+    
+                    // -- Generate Resources JSON Token
+    
+                    if (!$this->generateResourcesJsonToken($this->getOAuth2JsonToken())) {
+                        $this->resourcesResponse = $response->withStatus(401);
+                        return false;
+                    }
+    
+                    $resourcesJsonToken = $this->getResourcesToken();
+                }
+    
+            } else {
+    
+                // -- Login and/or password not defined
+    
+                $this->resourcesResponse = $response->withStatus(401);
+                return false;
+    
+            }
+    
+        // -- Token is defined
+        
+        } else {
+    
+            // -- Test Client authorization
+    
+            if (!$this->testClientAuthorization($jsonToken)) {
+    
+                // -- Send token error message
+    
+                $this->resourcesResponse = $response->withStatus(401);
+                return false;
+            }
+        }
+
+        $this->resourcesResponse = $response->withStatus(200);
         return true;
     }
 
@@ -240,5 +323,15 @@ $this->OAuthJsonToken = null;
     public function getResourcesJsonToken() : string
     {
         return $this->resourcesJsonToken;
+    }
+
+    /**
+    * Get Resources Response
+    *
+    * @return object Resources Response
+    */
+    public function getResourcesResponse() : object
+    {
+        return $this->resourcesResponse;
     }
 }
