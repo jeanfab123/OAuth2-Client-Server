@@ -1,8 +1,20 @@
 <?php
 
+
+
+/********************************************************/
+/******* TO DO : A mettre dans un fichier de conf *******/
+/********************************************************/
+
 $dsn      = 'mysql:dbname=slim_oauth2;host=localhost';
 $username = 'root';
 $password = '';
+
+/********************************************************/
+/********************************************************/
+/********************************************************/
+
+
 
 // error reporting (this is a demo, after all!)
 ini_set('display_errors',1);error_reporting(E_ALL);
@@ -13,39 +25,21 @@ OAuth2\Autoloader::register();
 
 
 
+/*************************************************/
+/******* TO DO : Intégrer à l'autoload ??? *******/
+/*************************************************/
 
+require_once('PdoApp.php');
 
-// ************************************** //
-// ***** A DEPLACER DANS UNE CLASSE ***** //
-// ************************************** //
-
-class appPDO extends OAuth2\Storage\Pdo {
-
-    public function hashPassword($password) {
-/*
-print password_hash($password, PASSWORD_BCRYPT);
-exit;
-*/
-        return password_hash($password, PASSWORD_BCRYPT);
-    }
-
-    public function checkPassword($user, $password)
-    {
-/*
-echo $password . "***" . $user['password'];
-exit;
-*/
-        return (password_verify($password, $user['password']));
-        //return $user['password'] == $this->hashPassword($password);
-    }
-}
-
+/*********************************************/
+/*********************************************/
+/*********************************************/
 
 
 
 // $dsn is the Data Source Name for your database, for exmaple "mysql:dbname=my_oauth2_db;host=localhost"
 //$storage = new OAuth2\Storage\Pdo(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
-$storage = new appPDO(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
+$storage = new PdoApp(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
 
 // Pass a storage object or array of storage objects to the OAuth2 server class
 //$server = new OAuth2\Server($storage);
