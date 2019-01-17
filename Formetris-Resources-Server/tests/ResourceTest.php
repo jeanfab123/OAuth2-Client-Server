@@ -1,5 +1,14 @@
 <?php
 
+/***********************************
+* Author : FABULAS Jean-Pierre
+*
+* Creation date : 2019-01-10
+*
+* Test Resources class methods
+*
+***********************************/
+
 namespace Testing;
 
 use PHPUnit\Framework\TestCase;
@@ -10,11 +19,9 @@ class ResourceTest extends TestCase
 
     private $OAuth2ServerToken = '{"access_token":"f559d449d2176ff40a20673524a6df1b0ce13413","expires_in":120,"token_type":"Bearer","scope":null}';
 
-    private $OAuth2GoodLogin = 'testClient';
-    private $OAuth2GoodPassword = ''; // TO DO : à compléter avec la bonne valeur
+    private $OAuth2GoodAuth = 'testclient:testpass';
 
-    private $OAuth2BadLogin = 'mybadlogin';
-    private $OAuth2BadPassword = 'mybadpassword';
+    private $OAuth2BadAuth = 'mybadlogin:mybadpassword';
 
     /******************************************************************/
     /******************* TEST BAD / GOOD CREDENTIALS ******************/
@@ -26,7 +33,7 @@ class ResourceTest extends TestCase
     public function shouldFailWhenThereIsBadCredentials()
     {
         $resources = new Resources;
-        $resources->requestOAuth2ServerForToken($this->OAuth2BadLogin, $this->OAuth2BadPassword);
+        $resources->requestOAuth2ServerForToken($this->OAuth2BadAuth);
         $this->assertEquals(401, $resources->getOAuth2StatusCode());
     }
 
@@ -37,7 +44,7 @@ class ResourceTest extends TestCase
     public function shouldValidWhenThereIsGoodCredentials()
     {
         $resources = new Resources;
-        $resources->requestOAuth2ServerForToken($this->OAuth2GoodLogin, $this->OAuth2GoodPassword);
+        $resources->requestOAuth2ServerForToken($this->OAuth2GoodAuth);
         $this->assertEquals(200, $resources->getOAuth2StatusCode());
     }
 

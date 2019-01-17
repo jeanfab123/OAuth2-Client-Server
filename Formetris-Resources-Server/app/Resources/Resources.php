@@ -1,14 +1,23 @@
 <?php
 
+/***********************************
+* Author : FABULAS Jean-Pierre
+*
+* Creation date : 2019-01-10
+*
+* Resources class
+*
+***********************************/
+
 namespace Resources;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class Resources {
 
     const OAUTH2_SERVER_BASE_URI = 'http://localhost:8000';
     const OAUTH2_SERVER_TOKEN_END_POINT = '/token.php';
-    // const TOKEN_HASH_SECRET_KEY = 'For!MeTrhriSs$Hhhh?'; // useless ?
 
     private $OAuth2StatusCode;
     private $oAuth2JsonToken;
@@ -21,54 +30,47 @@ class Resources {
     }
 
 
-    public function requestOAuth2ServerForToken(string $login, string $password) : void
+    public function requestOAuth2ServerForToken(string $auth) : void
     {
 
-/*
-        $client = $this->initializeOAuth2ServerRequest();
-        $response = $client->post(self::OAUTH2_SERVER_TOKEN_END_POINT);
-*/
+        // -- Send Request
 
-$this->OAuth2StatusCode = 401;
+        try {
 
-$this->OAuthJsonToken = null;
+            $client = $this->initializeOAuth2ServerRequest();
+            
+            $options = [
+                'form_params' => [
+                    'grant_type' => 'client_credentials',
+                ],
 
-/*
-        $this->OAuth2StatusCode = $response->getStatusCode();
-        return $this->OAuth2StatusCode;
-*/
-
-/*
-        $client = $this->initializeOAuth2ServerRequest();
-        $request = $client->post(self::OAUTH2_SERVER_TOKEN_END_POINT, null, array(
-            'client_id'     => $login,
-            'client_secret' => $password,
-            'grant_type'    => 'client_credentials',
-        ));
-
-        $response = $request->send();
-        $responseBody = $response->getBody(true);
-*/
-
-
-/*
-        $client = $this->initializeOAuth2ServerRequest();
-        $response = $client->request(
-            'POST',
-            self::OAUTH2_SERVER_TOKEN_END_POINT,
-
-            [
                 'headers' => [
-                    'Accept' => 'application/json',
-                    'grant_type' => 'client_credentials'
+                    'Authorization' => 'Basic '.base64_encode($auth),
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'request' => 'client_credentials'
                 ]
-            ],
-            [
-                'auth' => [$login, $password],
-            ]
-        );
+            ];
+
+            $response = $client->post(self::OAUTH2_SERVER_TOKEN_END_POINT, $options);
+
+            // -- Get OAuth2 Json Token
+
+            $this->oAuth2JsonToken = $response->getBody(true);
+/*
+$myfile = fopen("test.txt", "w");$txt = '';
+$txt = $this->oAuth2JsonToken;
+fwrite($myfile, $txt);
+fclose($myfile);
+
+die;
 */
 
+            $this->OAuth2StatusCode = $response->getStatusCode();
+
+        } catch (ClientException $e) {
+
+            $this->OAuth2StatusCode = 401;
+        }
     }
 
     public function generateResourcesJsonToken(string $OAuth2ServerToken) : bool
@@ -180,68 +182,63 @@ $this->OAuthJsonToken = null;
     {
 
         // -- Get Token
-    
+
         $token = $request->getHeader('token');
-     
+
         $jsonToken = isset($token['token']) ? $token['token'] : null;
-    
+
         // -- Token is not defined
-    
+
         if ($jsonToken == null) {
-    
-            // -- Get Login and Password
-    
-            $auth = $response->getHeader('auth');
-    
-            $login = isset($auth[0]) ? $auth[0] : null;
-            $password = isset($auth[1]) ? $auth[1] : null;
-    
-            if (($login != null) && ($password != null)) {
-    
-                // -- Request OAuth2 Server Token with Login and Password
-    
-                $this->requestOAuth2ServerForToken($login, $password);
+
+            // -- Get Auth
+
+            $authHeader = $request->getHeader('auth');
+            $auth = $authHeader[0];
+
+            if ($auth != null) {
+
+                // -- Request OAuth2 Server Token with Auth
+
+                $this->requestOAuth2ServerForToken($auth);
 
                 // -- Test OAuth2 Server request response
 
-                if ($this->getOAuth2StatusCode() != 200) { // TO DO : à modifier ???
-    
+                if ($this->getOAuth2StatusCode() != 200) {
+
                     // -- Send Bad Response
-    
+
                     $this->resourcesResponse = $response->withStatus(401);
                     return false;
-    
+
                 } else {
-    
+
                     // -- Generate Resources JSON Token
-    
+
                     if (!$this->generateResourcesJsonToken($this->getOAuth2JsonToken())) {
                         $this->resourcesResponse = $response->withStatus(401);
                         return false;
                     }
-    
-                    $resourcesJsonToken = $this->getResourcesToken();
                 }
-    
+
             } else {
-    
-                // -- Login and/or password not defined
-    
+
+                // -- Auth not defined
+
                 $this->resourcesResponse = $response->withStatus(401);
                 return false;
-    
             }
-    
+
         // -- Token is defined
-        
+
         } else {
-    
+
             // -- Test Client authorization
-    
+
             if (!$this->testClientAuthorization($jsonToken)) {
-    
+
                 // -- Send token error message
-    
+
                 $this->resourcesResponse = $response->withStatus(401);
                 return false;
             }

@@ -1,5 +1,14 @@
 <?php
 
+/***********************************
+* Author : FABULAS Jean-Pierre
+*
+* Creation date : 2019-01-16
+*
+* PdoApp class
+*
+***********************************/
+
 //namespace OAuth2\Storage;
 
 /*
@@ -23,7 +32,6 @@ class PdoApp extends OAuth2\Storage\Pdo {
     {
 
         $options = [
-            'cost' => 15,
 //            'memory_cost' => 2048,
             'time_cost' => 1000,
         ];

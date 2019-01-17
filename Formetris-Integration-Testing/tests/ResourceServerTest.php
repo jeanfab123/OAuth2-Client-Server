@@ -9,11 +9,10 @@ use GuzzleHttp\Exception\RequestException;
 class ResourceServerTest extends TestCase
 {
 
-    const GOOD_LOGIN = 'testclient';
-    const GOOD_PASSWORD = '$2y$10$O2AkWbnFnXbrrBkRSLbVn.IIgdQOySPwzt2eeucPYsGQSPCyPGkY2';
+    const GOOD_AUTH = 'testclient:testpass';
 
     const RESOURCES_SERVER_BASE_URI = 'http://localhost:9000';
-    const SURVEY_GENERATION_END_POINT = '/survey-generation';
+    const RESOURCES_SERVER_END_POINT = '/';
 
     /**
      * @test
@@ -21,73 +20,46 @@ class ResourceServerTest extends TestCase
     public function shouldFailWhenThereIsNoCredentials()
     {
         $client = new Client(['base_uri' => self::RESOURCES_SERVER_BASE_URI]);
+
         try {
-            $response = $client->get(self::SURVEY_GENERATION_END_POINT);
-            $this->assertEquals(200, $response->getStatusCode());
+
+            $response = $client->get(self::RESOURCES_SERVER_END_POINT);
+
+            $this->assertEquals(401, $response->getStatusCode());
+
         } catch (RequestException $ex) {
-            $this->assertEquals(200, $ex->getCode());
+
+            $this->assertEquals(401, $ex->getCode());
         }
     }
+
 
     /**
      * @test
      */
     public function shouldFailWhenThereIsBadCredentials()
     {
-        $client = new Client(['base_uri' => self::RESOURCES_SERVER_BASE_URI]);
- 
-        try {
-            $response = $client->request(
-                'GET',
-                self::SURVEY_GENERATION_END_POINT,
-                [
-                    'headers' => [
-                        'auth' =>
-                            [
-                                'myfakelogin', 
-                                'myfakepassword'
-                            ]
-                        ]
-                ]
-            );
-
-            $this->assertEquals(200, $response->getStatusCode());
-        } catch (RequestException $ex) {
-            $this->assertEquals(200, $ex->getCode());
-        }
+        $this->sendClientCredentials('mybadlogin:mybadpassword', 401);
     }
 
 
-
-/*
+    /**
+     * @test
+     */
     public function shouldValidWhenThereIsGoodCredentials()
     {
-        $client = new Client(['base_uri' => self::RESOURCES_SERVER_BASE_URI]);
- 
-        $response = $client->request(
-            'GET',
-            self::SURVEY_GENERATION_END_POINT,
-            ['headers' =>
-                ['auth' =>
-                    [
-                        self::GOOD_LOGIN, 
-                        self::GOOD_PASSWORD
-                    ]
-                ]
-            ]
-        );
+        $this->sendClientCredentials(self::GOOD_AUTH, 200);
 
-        $this->assertEquals(200, $response->getStatusCode());
     }
-*/
+
 
     /*
     public function shouldFailWhenThereIsBadToken() {
 
-        $client = new Client(['base_uri' => $this->resourcesServerBaseUri]);
+        $client = new Client(['base_uri' => self::RESOURCES_SERVER_BASE_URI]);
         $response = $client->request(
             'GET',
-            self::SURVEY_GENERATION_END_POINT,
+            self::RESOURCES_SERVER_END_POINT,
             ['headers' =>
                 [
                     'Authorization' => "Bearer mybadtoken-wzarflodsbn$"
@@ -98,4 +70,30 @@ class ResourceServerTest extends TestCase
     }
     */
 
+
+    /**
+     * @privateClass
+     */
+    private function sendClientCredentials(string $auth, int $expectedResponseCode) {
+
+        $client = new Client(['base_uri' => self::RESOURCES_SERVER_BASE_URI]);
+
+        try {
+
+            $options = [
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'auth' => [$auth],
+                ],
+            ];
+
+            $response = $client->get(self::RESOURCES_SERVER_END_POINT, $options);
+
+            $this->assertEquals($expectedResponseCode, $response->getStatusCode());
+
+        } catch (RequestException $ex) {
+
+            $this->assertEquals($expectedResponseCode, $ex->getCode());
+        }
+    }
 }

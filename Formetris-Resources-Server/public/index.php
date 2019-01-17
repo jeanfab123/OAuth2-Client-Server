@@ -1,5 +1,14 @@
 <?php
 
+/***********************************
+* Author : FABULAS Jean-Pierre
+*
+* Creation date : 2019-01-07
+*
+* Slim Routes
+*
+***********************************/
+
 require '../vendor/autoload.php';
 require '../app/settings.php';
 
@@ -13,9 +22,9 @@ use Resources\Resources;
 
 $app = new \Slim\App;
 
-// -- Survey Generation
+// -- Get Resources
 
-$app->get('/survey-generation', function (Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response) {
 
     $resources = new Resources;
 
