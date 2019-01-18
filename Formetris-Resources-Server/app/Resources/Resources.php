@@ -29,7 +29,13 @@ class Resources {
 
     }
 
-
+    /**
+    * Request OAuth2 Server for Token
+    *
+    * @param string auth
+    *
+    * @return void
+    */
     public function requestOAuth2ServerForToken(string $auth) : void
     {
 
@@ -56,14 +62,6 @@ class Resources {
             // -- Get OAuth2 Json Token
 
             $this->oAuth2JsonToken = $response->getBody(true);
-/*
-$myfile = fopen("test.txt", "w");$txt = '';
-$txt = $this->oAuth2JsonToken;
-fwrite($myfile, $txt);
-fclose($myfile);
-
-die;
-*/
 
             $this->OAuth2StatusCode = $response->getStatusCode();
 
@@ -73,6 +71,13 @@ die;
         }
     }
 
+    /**
+    * Generate resources JSON Token
+    *
+    * @param string OAuth2ServerToken
+    *
+    * @return bool
+    */
     public function generateResourcesJsonToken(string $OAuth2ServerToken) : bool
     {
 
@@ -113,6 +118,13 @@ die;
         return true;
     }
 
+    /**
+    * Test Client Authorization
+    *
+    * @param string jsonToken
+    *
+    * @return bool
+    */
     public function testClientAuthorization(string $jsonToken) : bool
     {
 
@@ -137,7 +149,13 @@ die;
         return true;
     }
 
-
+    /**
+    * Extract Client Token datas
+    *
+    * @param string jsonToken
+    *
+    * @return object
+    */
     public function extractClientTokenDatas(string $jsonToken) : object
     {
 
@@ -152,6 +170,13 @@ die;
         return $extractedTokenDatas;
     }
 
+    /**
+    * Test Client Token authenticity
+    *
+    * @param object clientTokenDatas
+    *
+    * @return bool
+    */
     public function testClientTokenAuthenticity(object $clientTokenDatas) : bool
     {
         $token = isset($clientTokenDatas->token) ? $clientTokenDatas->token : null;
@@ -164,7 +189,13 @@ die;
         return password_verify($token.$expirationDate, $hash);
     }
 
-
+    /**
+    * Test Client Token expiration date
+    *
+    * @param object clientTokenDatas
+    *
+    * @return bool
+    */
     public function testClientTokenExpirationDate(object $clientTokenDatas) : bool
     {
 
@@ -177,15 +208,22 @@ die;
         return true;
     }
 
-
-    public function testClientAuthorizationToAccessResources(object $request, object $response)
+    /**
+    * Test Client authorization to access Resources
+    *
+    * @param object request
+    * @param object response
+    *
+    * @return bool
+    */
+    public function testClientAuthorizationToAccessResources(object $request, object $response) : bool
     {
 
         // -- Get Token
 
-        $token = $request->getHeader('token');
+        $tokenHeader = $request->getHeader('token');
 
-        $jsonToken = isset($token['token']) ? $token['token'] : null;
+        $jsonToken = isset($tokenHeader[0]) ? $tokenHeader[0] : null;
 
         // -- Token is not defined
 
@@ -194,7 +232,8 @@ die;
             // -- Get Auth
 
             $authHeader = $request->getHeader('auth');
-            $auth = $authHeader[0];
+
+            $auth = isset($authHeader[0]) ? $authHeader[0] : null;
 
             if ($auth != null) {
 
@@ -216,8 +255,20 @@ die;
                     // -- Generate Resources JSON Token
 
                     if (!$this->generateResourcesJsonToken($this->getOAuth2JsonToken())) {
+
                         $this->resourcesResponse = $response->withStatus(401);
                         return false;
+
+                    } else {
+
+                        // -- Insert Resources JSON Token in response Header
+
+                        $this->resourcesResponse = $response->withAddedHeader('token', $this->getResourcesJsonToken());
+                        
+                        // -- Return response
+
+                        $this->resourcesResponse = $this->resourcesResponse->withStatus(200);
+                        return true;
                     }
                 }
 
@@ -241,11 +292,14 @@ die;
 
                 $this->resourcesResponse = $response->withStatus(401);
                 return false;
+            } else {
+
+                // -- Authorization OK
+
+                $this->resourcesResponse = $response->withStatus(200);
+                return true;
             }
         }
-
-        $this->resourcesResponse = $response->withStatus(200);
-        return true;
     }
 
 

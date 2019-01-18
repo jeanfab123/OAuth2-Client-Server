@@ -32,10 +32,9 @@ $app->get('/', function (Request $request, Response $response) {
 
         // -- Treatment and send answer
 
-
-    } else {
-        return $resources->getResourcesResponse();
     }
+
+    return $resources->getResourcesResponse();
 
 });
 

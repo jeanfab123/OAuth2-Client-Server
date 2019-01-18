@@ -32,7 +32,6 @@ class PdoApp extends OAuth2\Storage\Pdo {
     {
 
         $options = [
-//            'memory_cost' => 2048,
             'time_cost' => 1000,
         ];
         return password_hash($password, PASSWORD_ARGON2I, $options);
