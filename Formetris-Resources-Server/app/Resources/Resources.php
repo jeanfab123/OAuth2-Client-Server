@@ -325,11 +325,8 @@ class Resources {
     */
     private function hashTokenWithExpirationDate(string $token, string $expirationDate) : string
     {
-        $options = [
-            'time_cost' => 1000,
-        ];
 
-        return password_hash($token . self::RESOURCES_SERVER_TOKEN_HASH_KEY . $expirationDate, PASSWORD_ARGON2I, $options);
+        return password_hash($token . self::RESOURCES_SERVER_TOKEN_HASH_KEY . $expirationDate, PASSWORD_BCRYPT);
     }
 
     /**
