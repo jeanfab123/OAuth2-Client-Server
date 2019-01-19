@@ -19,6 +19,8 @@ class Resources {
     const OAUTH2_SERVER_BASE_URI = 'http://localhost:8000';
     const OAUTH2_SERVER_TOKEN_END_POINT = '/token.php';
 
+    const RESOURCES_SERVER_TOKEN_HASH_KEY = 'FoOrmE.eehe_Tri$sShhH';
+
     private $OAuth2StatusCode;
     private $oAuth2JsonToken;
     private $resourcesJsonToken;
@@ -186,7 +188,7 @@ class Resources {
         if (($token == null) || ($hash == null))
             return false;
 
-        return password_verify($token.$expirationDate, $hash);
+        return password_verify($token . self::RESOURCES_SERVER_TOKEN_HASH_KEY . $expirationDate, $hash);
     }
 
     /**
@@ -323,7 +325,11 @@ class Resources {
     */
     private function hashTokenWithExpirationDate(string $token, string $expirationDate) : string
     {
-        return password_hash($token . $expirationDate, PASSWORD_BCRYPT);
+        $options = [
+            'time_cost' => 1000,
+        ];
+
+        return password_hash($token . self::RESOURCES_SERVER_TOKEN_HASH_KEY . $expirationDate, PASSWORD_ARGON2I, $options);
     }
 
     /**
