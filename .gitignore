@@ -5,3 +5,6 @@
 
 /Formetris-Resources-Server/app/settings.php
 /Formetris-OAuth2-Server/public/settings.php
+
+/Formetris-Integration-Testing/composer.lock
+/Formetris-Client-Testing/composer.lock
