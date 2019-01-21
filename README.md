@@ -2,7 +2,9 @@
 
 Cette appli permet à un serveur de ressources d'authentifier un client en utilisant un serveur OAuth 2.0.
 
-Remarque : pour le moment, le répertoire "Formetris-Client-Server" n'est pas utilisé.
+Elle nécessite PHP 7.2 compilée avec l'algorithme de hashage ARGON2I.
+
+*__Remarque__ : pour le moment, le répertoire "Formetris-Client-Server" n'est pas utilisé.*
 
 ## Installation
 
