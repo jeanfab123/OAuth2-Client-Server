@@ -95,7 +95,7 @@ INSERT INTO oauth_clients (client_id, client_secret) VALUES ('testclient', 'le_m
 
 ```
 
-### Mise en place des fichiers
+## Mise en place des fichiers
 
 Créez un répertoire contenant le projet et clonez le projet :
 
@@ -107,11 +107,54 @@ git clone https://github.com/jeanfab123/OAuth2-Client-Server.git -b master
 
 ```
 
+Dans /Formetris-OAuth2-Server/public/, créez le fichier "settings.php" et éditez le :
+
+```
+
+<?php
+
+$dsn      = 'mysql:dbname=oauth2;host=localhost';
+$username = 'root';
+$password = 'mon_mot_de_passe';
+
+// -- Token Life Time
+
+$accessLifetime = 120;
+
+```
+
+Dans /Formetris-Resources-Server/app/, créez le fichier "settings.php" et éditez le :
+
+```
+
+<?php
+
+define('APP_ROOT', __DIR__);
+
+// You can change this constant
+
+define('OAUTH2_SERVER_BASE_URI', 'http://localhost:8000');
+
+return [
+    'doctrine' => [
+        'meta' => [
+            'entity_path' => [
+                'app/src/Entity'
+            ],
+            'auto_generate_proxies' => true,
+            'proxy_dir' =>  __DIR__.'/../cache/proxies',
+            'cache' => null,
+        ]
+    ]
+];
+
+```
+
 ## Mise en place des serveurs
 
 ### Lancer le serveur Formetris Client
 
-Dans /Formetris-Client-Server, lancer la commande :
+Dans /Formetris-Client-Server, lancez la commande :
 
 ```
 
@@ -121,7 +164,7 @@ php -S localhost:8500 -t public/ -ddisplay_errors=1 -dznet_extension=xdebug.so
 
 ### Lancer le serveur Formetris Resources 
 
-Dans /Formetris-Resources-Server, lancer la commande :
+Dans /Formetris-Resources-Server, lancez la commande :
 
 ```
 
@@ -131,13 +174,15 @@ php -S localhost:9000 -t public/ -ddisplay_errors=1 -dznet_extension=xdebug.so
 
 ### Lancer le serveur Formetris OAuth2
 
-Dans /Formetris-OAuth2-Server, lancer la commande :
+Dans /Formetris-OAuth2-Server, lancez la commande :
 
 ```
 
 php -S localhost:8000 -t public/ -ddisplay_errors=1 -dznet_extension=xdebug.so
 
 ```
+
+Remarque : l'adresse du serveur doit correspondre à la valeur de la constante "OAUTH2_SERVER_BASE_URI" que vous avez spécifiez dans le fichier "/Formetris-Resources-Server/app/settings.php"
 
 ## Tests
 

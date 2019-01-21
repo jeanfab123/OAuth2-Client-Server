@@ -9,45 +9,11 @@
 *
 ***********************************/
 
-
-
-/********************************************************/
-/******* TO DO : A mettre dans un fichier de conf *******/
-/********************************************************/
-
-$dsn      = 'mysql:dbname=slim_oauth2;host=localhost';
-$username = 'root';
-$password = '';
-
-$authCodeLifetime = 30;
-$accessLifetime = 120;
-$refreshTokenLifetime = 300; // not used
-
-/********************************************************/
-/********************************************************/
-/********************************************************/
-
-
-
-
-/********************************************************/
-/**************** TO DO : A supprimer ?? ****************/
-/********************************************************/
-
-// error reporting (this is a demo, after all!)
-ini_set('display_errors',1);error_reporting(E_ALL);
-
-/********************************************************/
-/********************************************************/
-/********************************************************/
-
-
-
+require_once('settings.php');
 
 // Autoloading (composer is preferred, but for this example let's just do this)
 require_once('../src/OAuth2/Autoloader.php');
 OAuth2\Autoloader::register();
-
 
 
 /*************************************************/
@@ -70,9 +36,9 @@ $storage = new PdoApp(array('dsn' => $dsn, 'username' => $username, 'password' =
 //$server = new OAuth2\Server($storage);
 $server = new OAuth2\Server($storage, array(
     'always_issue_new_refresh_token' => true,
-    'auth_code_lifetime' => $authCodeLifetime,
+    'auth_code_lifetime' => 30,
     'access_lifetime' => $accessLifetime,
-    'refresh_token_lifetime' => $refreshTokenLifetime,
+    'refresh_token_lifetime' => 300,
 ));
 
 // Add the "Client Credentials" grant type (it is the simplest of the grant types)

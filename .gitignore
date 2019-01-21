@@ -2,3 +2,6 @@
 /Formetris-Integration-Testing/vendor/
 /Formetris-OAuth2-Server/vendor/
 /Formetris-Resources-Server/vendor/
+
+/Formetris-Resources-Server/app/settings.php
+/Formetris-OAuth2-Server/public/settings.php

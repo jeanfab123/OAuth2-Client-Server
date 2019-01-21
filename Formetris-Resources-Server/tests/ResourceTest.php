@@ -14,6 +14,8 @@ namespace Testing;
 use PHPUnit\Framework\TestCase;
 use Resources\Resources;
 
+require 'app/settings.php';
+
 class ResourceTest extends TestCase
 {
 

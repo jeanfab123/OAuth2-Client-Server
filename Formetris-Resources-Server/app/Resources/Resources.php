@@ -16,7 +16,7 @@ use GuzzleHttp\Exception\ClientException;
 
 class Resources {
 
-    const OAUTH2_SERVER_BASE_URI = 'http://localhost:8000';
+    const OAUTH2_SERVER_BASE_URI = OAUTH2_SERVER_BASE_URI;
     const OAUTH2_SERVER_TOKEN_END_POINT = '/token.php';
 
     const RESOURCES_SERVER_TOKEN_HASH_KEY = 'FoOrmE.eehe_Tri$sShhH';
