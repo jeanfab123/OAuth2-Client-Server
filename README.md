@@ -1,5 +1,9 @@
 # Projet OAuth 2.0
 
+Cette appli permet à un serveur de ressources d'authentifier un client en utilisant un serveur OAuth 2.0.
+
+Remarque : pour le moment, le répertoire "Formetris-Client-Server" n'est pas utilisé.
+
 ## Installation
 
 ### Base de données OAuth 2.0
@@ -149,6 +153,16 @@ return [
 
 ```
 
+Dans /Formetris-Integration-Testing/tests/, créez le fichier "settings.php" et éditez le ('RESOURCES_SERVER_BASE_URI') :
+
+```
+
+<?php
+
+define('RESOURCES_SERVER_BASE_URI', 'http://localhost:9000');
+
+```
+
 Dans /Formetris-OAuth2-Server/, lancez la commande :
 
 ```
@@ -177,13 +191,15 @@ composer update
 
 ### Lancez le serveur Formetris Resources 
 
-Dans /Formetris-Resources-Server, lancez la commande :
+Dans /Formetris-Resources-Server/, lancez la commande :
 
 ```
 
 php -S localhost:9000 -t public/ -ddisplay_errors=1 -dznet_extension=xdebug.so
 
 ```
+
+Remarque : l'adresse du serveur doit correspondre à la valeur de la constante "RESOURCES_SERVER_BASE_URI" que vous avez spécifiez dans le fichier "/Formetris-Integration-Testing/tests/settings.php"
 
 ### Lancez le serveur Formetris OAuth2
 
@@ -201,7 +217,7 @@ Remarque : l'adresse du serveur doit correspondre à la valeur de la constante "
 
 ### Tests unitaires
 
-Dans /Formetris-Resources-Server, lancez la commande :
+Dans /Formetris-Resources-Server/, lancez la commande :
 
 ```
 
@@ -211,7 +227,7 @@ composer test
 
 ### Tests fonctionnels
 
-Dans /Formetris-Integration-Testing, lancez la commande :
+Dans /Formetris-Integration-Testing/, lancez la commande :
 
 ```
 

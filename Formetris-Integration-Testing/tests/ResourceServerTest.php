@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
+// -- A MODIFIER
+require('settings.php');
+// --
+
 class ResourceServerTest extends TestCase
 {
 
@@ -13,7 +17,7 @@ class ResourceServerTest extends TestCase
 
     const BAD_TOKEN = '{"access_token":"areyousureisabadtoken?nonononono!!","expires_in":120,"token_type":"Bearer","scope":null}';
 
-    const RESOURCES_SERVER_BASE_URI = 'http://localhost:9000';
+    const RESOURCES_SERVER_BASE_URI = RESOURCES_SERVER_BASE_URI;
     const RESOURCES_SERVER_END_POINT = '/';
 
     /**
