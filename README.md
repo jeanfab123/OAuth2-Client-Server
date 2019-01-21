@@ -199,7 +199,7 @@ php -S localhost:9000 -t public/ -ddisplay_errors=1 -dznet_extension=xdebug.so
 
 ```
 
-Remarque : l'adresse du serveur doit correspondre à la valeur de la constante "RESOURCES_SERVER_BASE_URI" que vous avez spécifiez dans le fichier "/Formetris-Integration-Testing/tests/settings.php"
+~~__Remarque__~~ : l'adresse du serveur doit correspondre à la valeur de la constante "RESOURCES_SERVER_BASE_URI" que vous avez spécifiez dans le fichier "/Formetris-Integration-Testing/tests/settings.php"
 
 ### Lancez le serveur Formetris OAuth2
 
@@ -211,9 +211,11 @@ php -S localhost:8000 -t public/ -ddisplay_errors=1 -dznet_extension=xdebug.so
 
 ```
 
-Remarque : l'adresse du serveur doit correspondre à la valeur de la constante "OAUTH2_SERVER_BASE_URI" que vous avez spécifiez dans le fichier "/Formetris-Resources-Server/app/settings.php"
+~~__Remarque__~~ : l'adresse du serveur doit correspondre à la valeur de la constante "OAUTH2_SERVER_BASE_URI" que vous avez spécifiez dans le fichier "/Formetris-Resources-Server/app/settings.php".
 
 ## Tests
+
+~~__Remarque importante__~~ : les tests unitaires et fonctionnels risquent de fonctionner uniquement sous Windows du fait du paramétrage du fichier composer.json.
 
 ### Tests unitaires
 
